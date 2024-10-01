@@ -13,6 +13,8 @@ import { Component } from '@angular/core';
           class="rounded-sm border border-blue-500 bg-blue-300 p-2">
           Load Top
         </button>
+      } @error {
+        <span>oops something went wrong in the application</span>
       }
     </div>
   `,

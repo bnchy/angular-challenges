@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Subject, concatMap, map } from 'rxjs';
+import { Subject, catchError, concatMap, map, of } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -42,7 +42,15 @@ export class AppComponent implements OnInit {
       .pipe(
         map(() => this.input),
         concatMap((value) =>
-          this.http.get(`https://jsonplaceholder.typicode.com/${value}/1`),
+          this.http.get(`https://jsonplaceholder.typicode.com/${value}/1`).pipe(
+            catchError((error) => {
+              console.log('error catched', error);
+              this.response = error;
+              return of({
+                message: `${value} is not an existing searchterm.`,
+              });
+            }),
+          ),
         ),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -50,10 +58,6 @@ export class AppComponent implements OnInit {
         next: (value) => {
           console.log(value);
           this.response = value;
-        },
-        error: (error) => {
-          console.log(error);
-          this.response = error;
         },
         complete: () => console.log('done'),
       });
